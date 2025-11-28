@@ -5,7 +5,6 @@ from models.student_model import Student
 from validators.student_input_validator import validate_student_input
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 # --- CONFIGURACIÓN AWS ---
@@ -18,37 +17,17 @@ S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
 SNS_TOPIC_ARN = os.getenv('SNS_TOPIC_ARN')
 DYNAMO_TABLE_NAME = os.getenv('DYNAMO_TABLE_NAME')
 
-# Clientes de AWS
-s3_client = boto3.client(
-    's3',
-    region_name=AWS_REGION,
-    aws_access_key_id=AWS_ACCESS_KEY,
-    aws_secret_access_key=AWS_SECRET_KEY,
-    aws_session_token=AWS_SESSION_TOKEN
-)
+s3_client = boto3.client('s3', region_name=AWS_REGION, aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY, aws_session_token=AWS_SESSION_TOKEN)
+sns_client = boto3.client('sns', region_name=AWS_REGION, aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY, aws_session_token=AWS_SESSION_TOKEN)
+dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION, aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY, aws_session_token=AWS_SESSION_TOKEN)
 
-sns_client = boto3.client(
-    'sns',
-    region_name=AWS_REGION,
-    aws_access_key_id=AWS_ACCESS_KEY,
-    aws_secret_access_key=AWS_SECRET_KEY,
-    aws_session_token=AWS_SESSION_TOKEN
-)
-
-dynamodb = boto3.resource(
-    'dynamodb',
-    region_name=AWS_REGION,
-    aws_access_key_id=AWS_ACCESS_KEY,
-    aws_secret_access_key=AWS_SECRET_KEY,
-    aws_session_token=AWS_SESSION_TOKEN
-)
 
 def get_all_students():
     try:
         students = Student.query.all()
         return jsonify([student.to_dict() for student in students]), 200
     except Exception as e:
-        return jsonify({"error": "Error de conexión a BD"}), 500
+        return jsonify({"error": str(e)}), 500
 
 def get_student_by_id(student_id):
     student = Student.query.get(student_id)
@@ -115,6 +94,7 @@ def delete_student(student_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
+
 # --- AWS INTEGRATIONS ---
 def upload_profile_picture(student_id):
     student = Student.query.get(student_id)
@@ -145,7 +125,7 @@ def upload_profile_picture(student_id):
         student.foto_perfil_url = foto_url
         db.session.commit()
 
-        return jsonify({"url": foto_url}), 200
+        return jsonify({"fotoPerfilUrl": foto_url}), 200
 
     except Exception as e:
         return jsonify({"error": f"Error al subir a S3: {str(e)}"}), 500
@@ -182,7 +162,7 @@ def login_student(student_id):
         return jsonify({"error": "Alumno no encontrado"}), 404
 
     if student.password != password_input:
-        return jsonify({"error": "Contraseña incorrecta"}), 403
+        return jsonify({"error": "Contraseña incorrecta"}), 400
 
     session_string = secrets.token_hex(64) # 128 chars
 
