@@ -1,21 +1,15 @@
-from typing import Dict
+from extensions import db 
 
-class Teacher:
-    def __init__(
-        self,
-        teacher_id: int,
-        employee_number: int,  # número de empleado
-        first_name: str,
-        last_name: str,
-        teaching_hours: int,   # horas de clase (solo enteras)
-    ) -> None:
-        self.id: int = teacher_id
-        self.employee_number: int = employee_number
-        self.first_name: str = first_name
-        self.last_name: str = last_name
-        self.teaching_hours: int = teaching_hours
+class Teacher(db.Model):
+    __tablename__ = 'teachers'
 
-    def to_dict(self) -> Dict[str, object]:
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    employee_number = db.Column(db.Integer, nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+    teaching_hours = db.Column(db.Integer, nullable=False)
+
+    def to_dict(self):
         return {
             "id": self.id,
             "numeroEmpleado": self.employee_number,

@@ -1,25 +1,22 @@
-from typing import Dict
+from extensions import db  
 
-class Student:
-    def __init__(
-        self,
-        student_id: int,
-        first_name: str,
-        last_name: str,
-        registration_number: int,  # matrícula numérica de 8 dígitos
-        grade_average: float,      # promedio 0.0 - 100.0
-    ) -> None:
-        self.id: int = student_id
-        self.first_name: str = first_name
-        self.last_name: str = last_name
-        self.registration_number: int = registration_number
-        self.grade_average: float = grade_average
+class Student(db.Model):
+    __tablename__ = 'students'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    registration_number = db.Column(db.String(10), nullable=False)
+    grade_average = db.Column(db.Float, nullable=False)
+    foto_perfil_url = db.Column(db.String(255)) 
+    password = db.Column(db.String(100)) 
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self):
         return {
             "id": self.id,
             "nombres": self.first_name,
             "apellidos": self.last_name,
             "matricula": self.registration_number,
             "promedio": self.grade_average,
+            "fotoPerfilUrl": self.foto_perfil_url
         }

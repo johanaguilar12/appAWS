@@ -1,2 +1,6 @@
 Flask
 gunicorn
+flask-sqlalchemy
+pymysql
+boto3
+python-dotenv
